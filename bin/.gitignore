@@ -1,9 +1,8 @@
 /Application.class
 /Main.class
+/MessageManager.class
 /Node.class
 /NodeInfo.class
 /ReadConfigFile.class
 /TCPClient.class
 /TCPServer.class
-/config.txt
-/MessageManager.class

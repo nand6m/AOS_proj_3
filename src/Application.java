@@ -1,5 +1,6 @@
 
 // Import required packages
+import org.apache.commons.math3.distribution.*;
 
 public class Application extends Thread {
 	private static long throughPut_startTime = 0;
@@ -7,9 +8,11 @@ public class Application extends Thread {
 	private static long response_startTime = 0;
 	private static long response_endTime = 0;
     int num_iteration=0;
+    ExponentialDistribution d_ed, c_ed;
     //Constructor
     public Application (int nodes, int d_mean, int c_mean, int num_iteration){
-       // ExponentialDistribution d_ed(d_mean), c_ed(c_mean) ; //doubt ?
+        d_ed = new ExponentialDistribution(d_mean);
+        c_ed = new ExponentialDistribution(c_mean);
         this.num_iteration=num_iteration;
     }
 
@@ -21,12 +24,22 @@ public class Application extends Thread {
             response_startTime = System.currentTimeMillis();
         //csEnter();
             System.out.println("Starting Critical section");
-         //   wait(c_ed.sample());
+            try {
+				Thread.sleep((long) c_ed.sample());
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             System.out.println("Ending Critical section");
           //  csLeave();
             response_endTime = System.currentTimeMillis();
             System.out.println("Response Time = " + (response_endTime - response_startTime) +"ms\n");
-          //  wait(d_ed.sample());
+            try {
+				Thread.sleep((long) d_ed.sample());
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         throughPut_endTime = System.currentTimeMillis();
         System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms\n");
