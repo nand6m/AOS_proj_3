@@ -1,17 +1,16 @@
 
 // Import required packages
 
-
 public class Application extends Thread {
 	private static long throughPut_startTime = 0;
 	private static long throughPut_endTime = 0;
 	private static long response_startTime = 0;
 	private static long response_endTime = 0;
-    
+    int num_iteration=0;
     //Constructor
     public Application (int nodes, int d_mean, int c_mean, int num_iteration){
-        ExponentialDistribution d_ed(d_mean), c_ed(c_mean) ; //doubt ?
-
+       // ExponentialDistribution d_ed(d_mean), c_ed(c_mean) ; //doubt ?
+        this.num_iteration=num_iteration;
     }
 
     @Override
@@ -20,14 +19,14 @@ public class Application extends Thread {
         for(int i=0; i < num_iteration; i++){
             System.out.println("Requesting to enter Critical section");
             response_startTime = System.currentTimeMillis();
-            csEnter();
+        //csEnter();
             System.out.println("Starting Critical section");
-            wait(c_ed.sample());
+         //   wait(c_ed.sample());
             System.out.println("Ending Critical section");
-            csLeave();
+          //  csLeave();
             response_endTime = System.currentTimeMillis();
             System.out.println("Response Time = " + (response_endTime - response_startTime) +"ms\n");
-            wait(d_ed.sample());
+          //  wait(d_ed.sample());
         }
         throughPut_endTime = System.currentTimeMillis();
         System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms\n");

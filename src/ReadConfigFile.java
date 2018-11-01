@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class ReadConfigFile {
 
-	public static NodeInfo readConfigFile(String name) throws IOException{
+	public static NodeInfo readConfigFile(String name,int nodeId) throws IOException{
 		NodeInfo file=new NodeInfo();
 		int node_count = 0,next = 0;
 		// Keeps track of current node
@@ -37,18 +37,18 @@ public class ReadConfigFile {
 					NumNodes=Integer.parseInt(config_input[0]);
 					
 					file.numOfNodes = Integer.parseInt(config_input[0]);
-					file.IRD=Integer.parseInt(config_input[1]);
+					file.d_mean=Integer.parseInt(config_input[1]);
 					
-					file.CSexec_time=Integer.parseInt(config_input[2]);
-					file.Req_count=Integer.parseInt(config_input[3]);
-					System.out.println("Num of Nodes: "+file.numOfNodes+" Inter-req-delay "+ file.IRD + " CS exec_time "+file.CSexec_time+ " Req_count "+file.Req_count);
+					file.c_mean=Integer.parseInt(config_input[2]);
+					file.num_iteration=Integer.parseInt(config_input[3]);
+					//System.out.println("Num of Nodes "+file.numOfNodes+" Inter-req-delay "+ file.d_mean + " CS exec_time "+file.c_mean+ " Req_count "+file.num_iteration);
 //					mapFile.minPerActive = Integer.parseInt(config_input[1]);
 //					mapFile.maxPerActive = Integer.parseInt(config_input[2]);
 //					mapFile.minSendDelay = Integer.parseInt(config_input[3]);
 //					mapFile.snapshotDelay = Integer.parseInt(config_input[4]);
 //					mapFile.maxNumber = Integer.parseInt(config_input[5]);
 					file.adjMtx = new int[NumNodes][NumNodes];
-					file.keys = new boolean[NumNodes][NumNodes];
+					file.keys = new boolean[NumNodes];
 					file.ClientConnectionCount= new int[file.numOfNodes];
 					next++;
 				}
@@ -72,11 +72,16 @@ public class ReadConfigFile {
 						file.adjMtx[curNode][i] = 1;
 						file.adjMtx[i][curNode] = 1;
 						//file.ClientConnectionCount[curNode] = config_input.length - 2;
-						if(curNode < i) {
-							file.keys[curNode][i]=true;
-							file.keys[i][curNode]=false;
+//						if(curNode < i) {
+//							file.keys[curNode][i]=true;
+//							file.keys[i][curNode]=false;
+//						}
 						}
+						if(nodeId != i) {
+							if( nodeId < i) file.keys[i] = true;
+							else file.keys[i] = false;
 						}
+						
 					}
 					curNode++;
 					if(node_count ==NumNodes){
@@ -94,10 +99,7 @@ public class ReadConfigFile {
 			System.out.println("Error reading file '" + fileName + "'");                  
 		}
 		for(Integer i=0;i<NumNodes;i++) {
-			for(Integer j=0;j<NumNodes;j++) {
-			System.out.print(file.keys[i][j]+ " " );
-			}
-			System.out.println();
+			System.out.print(file.keys[i]+ " " );
 		}
 		return file;
 	}

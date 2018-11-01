@@ -4,8 +4,9 @@ public class Main {
 	static NodeInfo NIobj=new NodeInfo();
 
 	public static void main(String[] args) throws IOException, InterruptedException {	
-		NIobj = ReadConfigFile.readConfigFile(args[1]);
 		NIobj.id = Integer.parseInt(args[0]);
+		NIobj = ReadConfigFile.readConfigFile(args[1],NIobj.id);
+		
 		
 		for(int i=0;i<NIobj.nodes.size();i++){
 			NIobj.nodeInfo.put(NIobj.nodes.get(i).nodeId, NIobj.nodes.get(i));

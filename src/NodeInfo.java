@@ -6,10 +6,10 @@ import java.util.HashMap;
 public class NodeInfo {
 
 	int numOfNodes;
-	int IRD;
-	boolean keys[][];
-	int CSexec_time;
-	int Req_count;
+	int d_mean;
+	boolean keys[];
+	int c_mean;
+	int num_iteration;
 	boolean ConnDone;
 	int[][] adjMtx;	
 	int ClientConnectionCount[];
