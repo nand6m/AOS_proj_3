@@ -11,21 +11,21 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 	Socket socket;
 	NodeInfo NIobj;
 	MsgListener l;
-	static spanningTreeNode stn;
-	static Broadcast broadcast;
+	//static spanningTreeNode stn;
+	//static Broadcast broadcast;
 	boolean isRunning;
 	ObjectOutputStream oos;
 	Integer neighborId;
 
-	static void setSpanningTreeNode(spanningTreeNode stninput)
-	{
-		stn = stninput;
-	}
+//	static void setSpanningTreeNode(spanningTreeNode stninput)
+//	{
+//		stn = stninput;
+//	}
 
-	static void setBroadcast(Broadcast b)
-	{
-		broadcast = b;
-	}
+//	static void setBroadcast(Broadcast b)
+//	{
+//		broadcast = b;
+//	}
 
 	void setNeighborId(Integer i){
 		this.neighborId = i;
