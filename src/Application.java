@@ -51,7 +51,7 @@ public class Application extends Thread {
         	}
         	throughPut_endTime = System.currentTimeMillis();
             	System.out.println("Average Response Time = " + (total_response_time/num_iteration) +"ms\n");
-        	System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms\n");
+        	System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms for CS time of " + c "ms\n");
     	}
 }
 

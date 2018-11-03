@@ -11,12 +11,11 @@ public class RCMutex implements MsgListener {
 	boolean keys[];
 	HashMap<Integer, Sender> senders;
 
-	//did not complete this
 	public void addSender(int neighbor, Sender s) {
 		senders.put(neighbor, s);    	
 	}
 
-	public void RCMutex(NodeInfo NIobj) {
+	public RCMutex(NodeInfo NIobj) {
 		this.NI = NIobj;
 		int i;	
 		keys = new boolean[NIobj.numOfNodes];
