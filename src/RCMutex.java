@@ -39,7 +39,8 @@ public class RCMutex implements MsgListener {
 		return true;
 	}
 
-	public synchronized void CS_enter() {
+	public synchronized void cs_enter() throws InterruptedException
+	{	
 		ReqTimeStamp = CurTimeStamp;
 		CSrequired = true;
 		sendMissingRequest();	
@@ -48,15 +49,15 @@ public class RCMutex implements MsgListener {
 			if(!inCS) wait();
 		}
 	}
-	public synchronized void CS_leave() {
+	public synchronized void cs_leave() {
 		inCS = false;
 		CSrequired = false;
 		notifyAll();
 	}
 
-	synchronized void waitForGrant()
+	synchronized void waitForGrant(long timestamp)
 	{
-		while(inCS || (CSrequired && ReqTimeStamp < m.timestamp)) {
+		while(inCS || (CSrequired && ReqTimeStamp < timestamp)) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -69,16 +70,16 @@ public class RCMutex implements MsgListener {
 		CurTimeStamp = Math.max(m.timestamp,CurTimeStamp);
 		CurTimeStamp++;
 		if(m.type == MsgType.request) {
-			waitForGrant();
+			waitForGrant(m.timestamp);
 			//now give
-			sendGrant(m.SrcNodeId);
+			sendGrant(m.sourceNodeId);
 		}
 		else if(m.type == MsgType.grant || m.type == MsgType.req_grant) {
 			keys[m.sourceNodeId]=true;
 			notifyAll();
 			if(m.type == MsgType.req_grant)
 			{
-				waitForGrant();
+				waitForGrant(m.timestamp);
 			}
 		}
 		return false;	
@@ -86,7 +87,7 @@ public class RCMutex implements MsgListener {
 
 	public synchronized void sendRequest(int id) {
 		msg.type = MsgType.request;
-		msg.SrcNodeId = NI.id;
+		msg.sourceNodeId = NI.id;
 		msg.timestamp = ReqTimeStamp;
 		senders.get(id).send(msg);
 		ReqTimeStamp++;
@@ -99,8 +100,8 @@ public class RCMutex implements MsgListener {
 		}else {
 			msg.type = MsgType.grant;
 		}
-		NI.keys[id] = false;
-		msg.SrcNodeId = NI.id;
+		keys[id] = false;
+		msg.sourceNodeId = NI.id;
 		msg.timestamp = CurTimeStamp;
 		senders.get(id).send(msg);
 		CurTimeStamp++;
@@ -109,7 +110,7 @@ public class RCMutex implements MsgListener {
 	public synchronized void sendMissingRequest() {
 		for(Integer i = 0 ; i < NI.numOfNodes; i++) {
 			if(i == NI.id) continue;
-			if(NI.keys[i] != true) {
+			if(keys[i] != true) {
 				sendRequest(i);
 			}
 		}

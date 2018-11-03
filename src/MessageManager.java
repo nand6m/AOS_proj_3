@@ -68,8 +68,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		initiate();
-		Thread.sleep(2000);
+		initiate();	
 		while(isRunning){
 			try {			
 				StreamMsg msg;
@@ -140,6 +139,14 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		{
 			//System.out.println("Received initiate from " + m.sourceNodeId);
 			setNeighborId(m.sourceNodeId);
+			try{
+				Thread.sleep(2000);
+			}
+			catch(InterruptedException e)
+			{
+				e.printStackTrace();
+				System.exit(2);
+			}
 		}
 		/*else if(m.type == MsgType.PACK || m.type == MsgType.NACK || m.type == MsgType.parentRequest){
 			stn.receive(m);

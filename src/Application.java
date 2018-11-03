@@ -1,6 +1,7 @@
 
 // Import required packages
 import org.apache.commons.math3.distribution.*;
+import java.lang.Math;
 
 public class Application extends Thread {
 	private static long throughPut_startTime = 0;
@@ -21,18 +22,18 @@ public class Application extends Thread {
 
     	@Override
     	public void run(){
-		int d = d_ed.sample();
-		int c = c_ed.sample();
+		long d = Math.round(d_ed.sample());
+		long c = Math.round(c_ed.sample());
 		throughPut_startTime = System.currentTimeMillis();
 		long total_response_time = 0;
         	for(int i=0; i < num_iteration; i++){
             		System.out.println("Requesting to enter Critical section");
            	 	response_startTime = System.currentTimeMillis();
-        		rcm.cs_enter();
-            		System.out.println("Starting Critical section");
-            		try {
+			try {
+        			rcm.cs_enter();
+				System.out.println("Starting Critical section");
 				//Consume some resource
-				Thread.sleep((long) c);
+				Thread.sleep(c);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -42,7 +43,7 @@ public class Application extends Thread {
             		response_endTime = System.currentTimeMillis();
 			total_response_time += response_endTime - response_startTime;
             		try {
-				Thread.sleep((long) d);
+				Thread.sleep(d);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

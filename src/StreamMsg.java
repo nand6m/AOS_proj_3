@@ -5,7 +5,7 @@ enum MsgType{initiate,neighbor,okay,terminate,PACK,NACK,parentRequest, broadcast
 public class StreamMsg implements Serializable {
 	int sourceNodeId;
 	int immediateSourceNodeId;
-	int timestamp;
+	long timestamp;
 	MsgType type;
 	String message;
 

@@ -92,9 +92,6 @@ public class ReadConfigFile {
 		catch(IOException ex) {
 			System.out.println("Error reading file '" + fileName + "'");                  
 		}
-		for(Integer i=0;i<NumNodes;i++) {
-			System.out.print(file.keys[i]+ " " );
-		}
 		return file;
 	}
 
