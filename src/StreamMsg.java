@@ -1,17 +1,19 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 
-enum MsgType{request,grant,req_grant};
+enum MsgType{initiate,neighbor,okay,terminate,PACK,NACK,parentRequest, broadcast,convergeCast_ack,broadcast_terminate,request,grant,req_grant};
 public class StreamMsg implements Serializable {
+	int sourceNodeId;
+	int immediateSourceNodeId;
 	int timestamp;
-	int SrcNodeId;
 	MsgType type;
 	String message;
 
 	public StreamMsg(){
+		sourceNodeId = -1;
+		immediateSourceNodeId = -1;
 		timestamp = -1;
-		SrcNodeId = -1;
-		type = MsgType.request;
+		type = MsgType.okay;
 		message = " ";
 	}
 }

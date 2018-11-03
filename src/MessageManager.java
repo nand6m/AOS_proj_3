@@ -13,6 +13,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 	MsgListener l;
 	//static spanningTreeNode stn;
 	//static Broadcast broadcast;
+	static RCMutex rcm;
 	boolean isRunning;
 	ObjectOutputStream oos;
 	Integer neighborId;
@@ -27,11 +28,20 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 //		broadcast = b;
 //	}
 
+	static void setRCMutex(RCMutex rcminput)
+	{
+		rcm = rcminput;
+	}
+
 	void setNeighborId(Integer i){
 		this.neighborId = i;
-		if(stn != null)
+		/*if(stn != null)
 		{
 			stn.addSender(neighborId, this);
+		}*/
+		if(rcm != null)
+		{
+			rcm.addSender(neighborId, this);
 		}
 	}
 
@@ -59,6 +69,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 			e1.printStackTrace();
 		}
 		initiate();
+		Thread.sleep(2000);
 		while(isRunning){
 			try {			
 				StreamMsg msg;
@@ -130,11 +141,15 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 			//System.out.println("Received initiate from " + m.sourceNodeId);
 			setNeighborId(m.sourceNodeId);
 		}
-		else if(m.type == MsgType.PACK || m.type == MsgType.NACK || m.type == MsgType.parentRequest){
+		/*else if(m.type == MsgType.PACK || m.type == MsgType.NACK || m.type == MsgType.parentRequest){
 			stn.receive(m);
 		}
 		else if(m.type == MsgType.broadcast || m.type == MsgType.convergeCast_ack || m.type == MsgType.broadcast_terminate){
 			isRunning = !broadcast.receive(m);
+		}*/
+		else if(m.type == MsgType.request || m.type == MsgType.grant || m.type == MsgType.req_grant)
+		{
+			rcm.receive(m);
 		}
 		return !isRunning;
 	}

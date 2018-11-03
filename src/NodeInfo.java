@@ -7,7 +7,6 @@ public class NodeInfo {
 
 	int numOfNodes;
 	int d_mean;
-	boolean keys[];
 	int c_mean;
 	int num_iteration;
 	boolean ConnDone;
@@ -22,14 +21,14 @@ public class NodeInfo {
 	HashMap<Integer,Node> nodeInfo;
 	
 	// Create all the channels in the beginning and keep it open till the end
-		// Mapping between each process as a server and its client connections
-		//HashMap<Integer,Socket> channels;
-		ArrayList<Socket> channels;
+	// Mapping between each process as a server and its client connections
+	//HashMap<Integer,Socket> channels;
+	ArrayList<Socket> channels;
 		
 		
 	//ArrayList which holds the total processes(nodes) 
 	ArrayList<Node> nodes;
-public NodeInfo() {
+	public NodeInfo() {
 	
 	nodes = new ArrayList<Node>();	
 	nodeInfo = new HashMap<Integer,Node>();

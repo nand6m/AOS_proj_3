@@ -19,11 +19,11 @@ public class Main {
 		new TCPClient(NIobj, NIobj.id);
 		server.listenforinput();
 		System.out.println("All connections done!");
-		if(NIobj.id == 1){
-			Thread.sleep(2000);
-			System.out.println("Initiating Spanning Tree construction");
+		//if(NIobj.id == 1){
+		//	Thread.sleep(2000);
+		//	System.out.println("Initiating Spanning Tree construction");
 			//stn.initiateConstruction();
-		}
+		//}
 		
 		
 		
