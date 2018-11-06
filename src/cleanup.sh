@@ -38,5 +38,6 @@ cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
    
 )
 
+for i in `ps aux | grep bash | cut -s  -d' ' -f6`; do if [[ $i != $$ ]]; then kill $i; fi; done
 
 echo "Cleanup complete"

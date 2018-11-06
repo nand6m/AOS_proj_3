@@ -55,3 +55,4 @@ cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
         n=$(( n + 1 ))
     done
 )
+sleep 2m
