@@ -2,6 +2,11 @@
 // Import required packages
 import org.apache.commons.math3.distribution.*;
 import java.lang.Math;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class Application extends Thread {
 	private static long throughPut_startTime = 0;
@@ -9,15 +14,16 @@ public class Application extends Thread {
 	private static long response_startTime = 0;
 	private static long response_endTime = 0;
 	int num_iteration=0;
-    	ExponentialDistribution d_ed, c_ed;
+    ExponentialDistribution d_ed, c_ed;
 	RCMutex rcm;
     	
 	//Constructor
     	public Application (int nodes, int d_mean, int c_mean, int num_iteration, RCMutex rcminput){
-        	d_ed = new ExponentialDistribution(d_mean);
-      	  	c_ed = new ExponentialDistribution(c_mean);
-       		this.num_iteration=num_iteration;
+        d_ed = new ExponentialDistribution(d_mean);
+      	c_ed = new ExponentialDistribution(c_mean);
+       	this.num_iteration=num_iteration;
 		this.rcm = rcminput;
+		File f = new File("/.../output.txt"); //Give file path in DC machine
 	}
 
     	@Override
@@ -50,8 +56,14 @@ public class Application extends Thread {
 			}
         	}
         	throughPut_endTime = System.currentTimeMillis();
-            	System.out.println("Average Response Time = " + (total_response_time/num_iteration) +"ms\n");
-        	System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms for CS time of " + c + "ms\n");
+            System.out.println("Average Response Time = " + (total_response_time/num_iteration) +"ms\n");
+			System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms for CS time of " + c + "ms\n");
+			
+			//Writing results to file (i.e. output.txt) - Not yet tested
+			FileWriter fw = new FileWriter(f, true); // Here 'true' indicates that new data would be appended to file
+			fw.write( nodes + "  " + c + "  " + d + "  " + (total_response_time/num_iteration) + "  " + (throughPut_endTime - throughPut_startTime) + "\n");
+			fw.flush();
+			fw.close();
     	}
 }
 
