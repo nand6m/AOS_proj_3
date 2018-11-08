@@ -28,9 +28,9 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 //		broadcast = b;
 //	}
 
-	static void setRCMTester(MutexTest)
-	{
-	}
+//	static void setRCMTester(MutexTest)
+//	{
+//	}
 
 	static void setRCMutex(RCMutex rcminput)
 	{
