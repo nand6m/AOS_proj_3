@@ -11,3 +11,6 @@
 /MsgType.class
 /RCMutex.class
 /Sender.class
+/Compile.sh
+/cleanup.sh
+/launcher.sh

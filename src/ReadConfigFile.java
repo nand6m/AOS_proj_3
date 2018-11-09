@@ -13,7 +13,7 @@ public class ReadConfigFile {
 		int curNode = 0;
 		int NumNodes=0;
 		//int adjMtx[][]=null;
-		
+		file.id = nodeId;
 		String fileName = name;
 		System.out.println(fileName);
 		String line = null;

@@ -14,6 +14,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 	//static spanningTreeNode stn;
 	//static Broadcast broadcast;
 	static RCMutex rcm;
+	static MutexTest mt;
 	boolean isRunning;
 	ObjectOutputStream oos;
 	Integer neighborId;
@@ -28,8 +29,9 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 //		broadcast = b;
 //	}
 
-	static void setRCMTester(MutexTest)
+	static void setRCMTester(MutexTest m)
 	{
+		mt = m;
 	}
 
 	static void setRCMutex(RCMutex rcminput)

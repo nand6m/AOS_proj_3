@@ -13,14 +13,17 @@ public class Main {
 		}
 
 		RCMutex rcm = new RCMutex(NIobj);
+		MutexTest mt = new MutexTest(NIobj.id, NIobj.num_iteration,rcm);
 		MessageManager.setRCMutex(rcm);
-
+		MessageManager.setRCMTester(mt);
 		TCPServer server = new TCPServer(NIobj);		
 		new TCPClient(NIobj, NIobj.id);
 		server.listenforinput();
-		System.out.println("All connections done!");
+		System.out.println(NIobj.id+ " All connections done!");
 		Thread.sleep(2000);
+		System.out.println(NIobj.id +" :id");
 		Application app = new Application(NIobj.id, NIobj.d_mean, NIobj.c_mean, NIobj.num_iteration, rcm);
 		app.run();
 	}
 }
+	
