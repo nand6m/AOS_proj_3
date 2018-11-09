@@ -22,8 +22,7 @@ public class Application extends Thread {
         d_ed = new ExponentialDistribution(d_mean);
       	c_ed = new ExponentialDistribution(c_mean);
        	this.num_iteration=num_iteration;
-		this.rcm = rcminput;
-		File f = new File("/output.txt"); //Give file path in DC machine
+
 	}
 
     	@Override
@@ -61,7 +60,6 @@ public class Application extends Thread {
 			
 			//Writing results to file (i.e. output.txt) - Not yet tested
 			FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // Here 'true' indicates that new data would be appended to file
-			fw.write( nodes + ", " + c + ", " + d + ", " + (total_response_time/num_iteration) + ", " + (throughPut_endTime - throughPut_startTime) + "\n");
 			fw.flush();
 			fw.close();
     	}
