@@ -24,17 +24,12 @@ public class Application extends Thread {
         d_ed = new ExponentialDistribution(d_mean);
       	c_ed = new ExponentialDistribution(c_mean);
        	this.num_iteration=num_iteration;
-<<<<<<< HEAD
-<<<<<<< HEAD
 	this.rcm = rcminput;	
 	this.nodes = nodes;
-=======
+
 		this.rcm = rcminput;
 		File f = new File("/output.txt"); //Give file path in DC machine
->>>>>>> de604d114f7bbeb6b946404b23e0cc604ef2ca93
-=======
 
->>>>>>> 313e5260f7e75b749ec4ac3999aea21e6df0c6a4
 	}
 
     	@Override
@@ -73,14 +68,8 @@ public class Application extends Thread {
 			try{
 			//Writing results to file (i.e. output.txt) - Not yet tested
 			FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // Here 'true' indicates that new data would be appended to file
-<<<<<<< HEAD
-<<<<<<< HEAD
-			fw.write( nodes + " , " + c + " , " + d + " , " + (total_response_time/num_iteration) + " , " + (throughPut_endTime - throughPut_startTime) + "\n");
-=======
+
 			fw.write( nodes + ", " + c + ", " + d + ", " + (total_response_time/num_iteration) + ", " + (throughPut_endTime - throughPut_startTime) + "\n");
->>>>>>> de604d114f7bbeb6b946404b23e0cc604ef2ca93
-=======
->>>>>>> 313e5260f7e75b749ec4ac3999aea21e6df0c6a4
 			fw.flush();
 			fw.close();
 			}catch( IOException ie){
