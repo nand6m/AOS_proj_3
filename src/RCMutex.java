@@ -6,18 +6,20 @@ public class RCMutex implements MsgListener {
 	long ReqTimeStamp=0;
 	long CurTimeStamp = 0;
 
-	StreamMsg msg=new StreamMsg();
-	NodeInfo NI=new NodeInfo();
+	//StreamMsg msg=new StreamMsg();
+	NodeInfo NI;
 	boolean keys[];
 	HashMap<Integer, Sender> senders;
 
 	public void addSender(int neighbor, Sender s) {
-		senders.put(neighbor, s);    	
+		senders.put(neighbor, s);
+		//System.out.println("Adding "+ neighbor+ " socket to senders");    	
 	}
 
 	public RCMutex(NodeInfo NIobj) {
 		this.NI = NIobj;
-		int i;	
+		int i;
+		this.senders = new HashMap<Integer , Sender>();	
 		keys = new boolean[NIobj.numOfNodes];
 		for(i = 0; i < NI.id; i++)
 		{
@@ -40,7 +42,7 @@ public class RCMutex implements MsgListener {
 
 	public synchronized void cs_enter() throws InterruptedException
 	{	
-		ReqTimeStamp = CurTimeStamp;
+		ReqTimeStamp = CurTimeStamp + 1;
 		CSrequired = true;
 		sendMissingRequest();	
 		while(!inCS) {
@@ -54,9 +56,9 @@ public class RCMutex implements MsgListener {
 		notifyAll();
 	}
 
-	synchronized void waitForGrant(long timestamp)
+	synchronized void waitAndSendGrant(Integer sourceNodeId , long timestamp )
 	{
-		while(inCS || (CSrequired && ReqTimeStamp < timestamp)) {
+		while(inCS || (CSrequired && ReqTimeStamp < timestamp) || (CSrequired && ReqTimeStamp == timestamp && NI.id < sourceNodeId) ) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -64,36 +66,39 @@ public class RCMutex implements MsgListener {
 				e.printStackTrace();
 			}
 		}
+		//now give
+		sendGrant(sourceNodeId);
 	}
 	public synchronized boolean receive(StreamMsg m){
 		CurTimeStamp = Math.max(m.timestamp,CurTimeStamp);
 		CurTimeStamp++;
 		if(m.type == MsgType.request) {
-			waitForGrant(m.timestamp);
-			//now give
-			sendGrant(m.sourceNodeId);
-		}
+			waitAndSendGrant(m.sourceNodeId , m.timestamp);
+			}
 		else if(m.type == MsgType.grant || m.type == MsgType.req_grant) {
 			keys[m.sourceNodeId]=true;
 			notifyAll();
 			if(m.type == MsgType.req_grant)
 			{
-				waitForGrant(m.timestamp);
+				waitAndSendGrant(m.sourceNodeId , m.timestamp);
 			}
 		}
 		return false;	
 	}
 
 	public synchronized void sendRequest(int id) {
+		StreamMsg msg=new StreamMsg();
 		msg.type = MsgType.request;
 		msg.sourceNodeId = NI.id;
 		msg.timestamp = ReqTimeStamp;
+		System.out.println(NI.id+" Sending "+ msg.type +" to "+id +" ,timestamp: "+msg.timestamp);
 		senders.get(id).send(msg);
-		ReqTimeStamp++;
+		//ReqTimeStamp++;
 		CurTimeStamp++;
 	}
 
 	public synchronized void sendGrant(int id) {
+		StreamMsg msg=new StreamMsg();
 		if(CSrequired) {
 			msg.type = MsgType.req_grant;
 		}else {
@@ -102,6 +107,7 @@ public class RCMutex implements MsgListener {
 		keys[id] = false;
 		msg.sourceNodeId = NI.id;
 		msg.timestamp = CurTimeStamp;
+		System.out.println(NI.id+" Sending "+ msg.type +" to "+id +" ,timestamp: "+ msg.timestamp);
 		senders.get(id).send(msg);
 		CurTimeStamp++;
 	}

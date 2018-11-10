@@ -35,7 +35,7 @@ public class TCPClient {
 				NIobj.channels.add(client);
 				//NIobj.neighbors.add(i);
 				//For every client request start a new thread 
-				//new MessageManager(client, NIobj).start();
+				new MessageManager(client, NIobj).start();
 			}
 		}	 
 	}		

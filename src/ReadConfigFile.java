@@ -70,7 +70,8 @@ public class ReadConfigFile {
 							//System.out.println(Integer.parseInt(config_input[i]));
 							file.adjMtx[curNode][i] = 1;
 							file.adjMtx[i][curNode] = 1;
-							//file.ClientConnectionCount[curNode] = config_input.length - 2;
+							file.ClientConnectionCount[curNode] = NumNodes - 1;
+                                                        //file.ClientConnectionCount[curNode] = config_input.length - 2;
 //							if(curNode < i) {
 //								file.keys[curNode][i]=true;
 //								file.keys[i][curNode]=false;

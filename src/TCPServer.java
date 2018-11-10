@@ -38,9 +38,9 @@ public class TCPServer {
 		//Listen and accept for any client connections
 		int count=0;
 		//try{	
-			//System.out.println(NIobj.channels.size());
+			//System.out.println(NIobj.id+" --> "+NIobj.channels.size());
 			while (NIobj.ClientConnectionCount[NIobj.id]!=NIobj.channels.size()) {
-				try {
+				try {   //System.out.println(NIobj.id+" --> "+NIobj.ClientConnectionCount[NIobj.id]+","+NIobj.channels.size());
 					socket = listener.accept();
 					count++;
 					//InetAddress address=socket.getInetAddress();
@@ -53,7 +53,7 @@ public class TCPServer {
 					
 					if(count==NIobj.ClientConnectionCount[NIobj.id])
 					{
-						//System.out.println("Connections Done");
+						//System.out.println(NIobj.id+" Connections Done");
 						NIobj.ConnDone=true;
 						System.out.println("id: "+ NIobj.id+" neighbours "+ NIobj.neighbors + " connections Done is "+NIobj.ConnDone);
 						
@@ -64,7 +64,7 @@ public class TCPServer {
 					System.exit(1);
 				}
 				// For every client request start a new thread 
-				//new MessageManager(socket, NIobj).start();
+				new MessageManager(socket, NIobj).start();
 			}
 		//}
 		/*finally {
