@@ -6,6 +6,7 @@ class MutexTest extends Thread
 	int iterations;
 	Sender coordinator;
 	RCMutex rcm;
+	volatile boolean isWaiting = false;
 
 	public MutexTest(int id, int iterations, RCMutex rcm)
 	{
@@ -20,7 +21,7 @@ class MutexTest extends Thread
 		this.coordinator = s;
 	}
 
-	public boolean receive(StreamMsg m, Sender s)
+	public synchronized boolean receive(StreamMsg m, Sender s)
 	{
 		if(m.type == MsgType.get_i)
 		{
@@ -29,6 +30,8 @@ class MutexTest extends Thread
 		else if(m.type == MsgType.set_i)
 		{
 			i = Integer.parseInt(m.message);
+			isWaiting = false;
+			notifyAll();
 		}
 		return false;
 	}
@@ -42,12 +45,20 @@ class MutexTest extends Thread
 		s.send(reply);
 	}
 
-	public void request_i()
+	public synchronized void request_i()
 	{
+		isWaiting = true;
 		StreamMsg m = new StreamMsg();
 		m.sourceNodeId = id;
 		m.type = MsgType.get_i;
 		coordinator.send(m);
+		System.out.println("REQUESTED I");
+		while(isWaiting){
+			try{wait();}   
+			catch(InterruptedException ie){ie.printStackTrace();}
+		}
+		System.out.println("RECEIVED I");
+		
 	}
 
 	@Override
@@ -62,7 +73,7 @@ class MutexTest extends Thread
 					request_i();
 				}
 				i = i + 1;
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
 			catch (Exception e){
 				e.printStackTrace();
@@ -72,6 +83,13 @@ class MutexTest extends Thread
 				send_i(coordinator);
 			}
 			rcm.cs_leave();
+		}
+		try{Thread.sleep(90000);}
+		catch(InterruptedException ie){
+			ie.printStackTrace();
+		}
+		if(id == 0){
+			System.out.println("Value of i after testing : "+ i);
 		}
 	}
 }
