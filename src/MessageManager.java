@@ -55,6 +55,10 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		{
 			rcm.addSender(neighborId, this);
 		}
+		if(i == 0)
+		{
+			mt.setCoordinator(this);
+		}
 	}
 
 	public MessageManager(Socket socket,NodeInfo NIobj) {
@@ -151,14 +155,14 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		{
 			//System.out.println("Received initiate from " + m.sourceNodeId);
 			setNeighborId(m.sourceNodeId);
-			try{
+			/*try{
 				Thread.sleep(2000);
 			}
 			catch(InterruptedException e)
 			{
 				e.printStackTrace();
 				System.exit(2);
-			}
+			}*/
 		}
 		/*else if(m.type == MsgType.PACK || m.type == MsgType.NACK || m.type == MsgType.parentRequest){
 			stn.receive(m);
@@ -169,6 +173,10 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		else if(m.type == MsgType.request || m.type == MsgType.grant || m.type == MsgType.req_grant)
 		{
 			rcm.receive(m);
+		}
+		else if(m.type == MsgType.set_i || m.type == MsgType.get_i)
+		{
+			mt.receive(m, this);
 		}
 		return !isRunning;
 	}

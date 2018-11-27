@@ -113,7 +113,7 @@ public class RCMutex implements MsgListener {
 		msg.type = MsgType.request;
 		msg.sourceNodeId = NI.id;
 		msg.timestamp = ReqTimeStamp;
-		System.out.println(NI.id+" Sending "+ msg.type +" to "+id +" ,timestamp: "+msg.timestamp);
+		//System.out.println(NI.id+" Sending "+ msg.type +" to "+id +" ,timestamp: "+msg.timestamp);
 		senders.get(id).send(msg);
 		//ReqTimeStamp++;
 		CurTimeStamp++;
@@ -129,7 +129,7 @@ public class RCMutex implements MsgListener {
 		keys[id] = false;
 		msg.sourceNodeId = NI.id;
 		msg.timestamp = CurTimeStamp;
-		System.out.println(NI.id+" Sending "+ msg.type +" to "+id +" ,timestamp: "+ msg.timestamp);
+		//System.out.println(NI.id+" Sending "+ msg.type +" to "+id +" ,timestamp: "+ msg.timestamp);
 		senders.get(id).send(msg);
 		CurTimeStamp++;
 	}

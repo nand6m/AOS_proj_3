@@ -1,5 +1,5 @@
-./cleanup.sh
 #!/bin/bash
+./cleanup.sh
 
 # Change this to your netid
 netid=sxd167930
@@ -55,4 +55,4 @@ cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
         n=$(( n + 1 ))
     done
 )
-sleep 2m
+#sleep 2m

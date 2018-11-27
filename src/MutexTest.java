@@ -29,6 +29,7 @@ class MutexTest extends Thread
 		else if(m.type == MsgType.set_i)
 		{
 			i = Integer.parseInt(m.message);
+			System.out.println("Value of i is " + i);
 		}
 		return false;
 	}
@@ -53,25 +54,27 @@ class MutexTest extends Thread
 	@Override
 	public void run()
 	{
-		for(int j = 0; j < iterations; j++)
-		{
-			try{
+		try{
+			for(int j = 0; j < iterations; j++)
+			{
 				rcm.cs_enter();
 				if(id != 0)
 				{
 					request_i();
 				}
 				i = i + 1;
-				Thread.sleep(100);
+				Thread.sleep(100);			
+				if(id != 0)
+				{
+					send_i(coordinator);
+				}
+				rcm.cs_leave();
 			}
-			catch (Exception e){
-				e.printStackTrace();
-			}
-			if(id != 0)
-			{
-				send_i(coordinator);
-			}
-			rcm.cs_leave();
+			Thread.sleep(10000);
+			System.out.println("Final value of i = " + i);
+		}
+		catch (Exception e){
+			e.printStackTrace();
 		}
 	}
 }

@@ -22,8 +22,9 @@ public class Main {
 		System.out.println(NIobj.id+ " All connections done!");
 		Thread.sleep(10000);
 		System.out.println(NIobj.id +" :id");
-		Application app = new Application(NIobj.id, NIobj.d_mean, NIobj.c_mean, NIobj.num_iteration, rcm);
-		app.run();
+		mt.run();
+		//Application app = new Application(NIobj.id, NIobj.d_mean, NIobj.c_mean, NIobj.num_iteration, rcm);
+		//app.run();
 	}
 }
 	
