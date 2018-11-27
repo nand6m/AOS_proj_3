@@ -9,6 +9,7 @@ public class RCMutex implements MsgListener {
 	//StreamMsg msg=new StreamMsg();
 	NodeInfo NI;
 	boolean keys[];
+	boolean keyRequired[];
 	HashMap<Integer, Sender> senders;
 
 	public void addSender(int neighbor, Sender s) {
@@ -21,13 +22,16 @@ public class RCMutex implements MsgListener {
 		int i;
 		this.senders = new HashMap<Integer , Sender>();	
 		keys = new boolean[NIobj.numOfNodes];
+		keyRequired = new boolean[NIobj.numOfNodes];
 		for(i = 0; i < NI.id; i++)
 		{
 			keys[i] = false;
+			keyRequired[i] = false;
 		}
 		for(; i < NI.numOfNodes; i++)
 		{
 			keys[i] = true;
+			keyRequired[i] = false;
 		}
 	}
 
@@ -53,34 +57,52 @@ public class RCMutex implements MsgListener {
 	public synchronized void cs_leave() {
 		inCS = false;
 		CSrequired = false;
-		notifyAll();
+		sendRequiredKeys();
 	}
 
-	synchronized void waitAndSendGrant(Integer sourceNodeId , long timestamp )
+	void sendRequiredKeys()
 	{
-		while(inCS || (CSrequired && ReqTimeStamp < timestamp) || (CSrequired && ReqTimeStamp == timestamp && NI.id < sourceNodeId) ) {
-			try {
+		for(int i = 0; i < NI.numOfNodes; i++)
+		{
+			if(keyRequired[i] == true)
+			{
+				keyRequired[i] = false;
+				sendGrant(i);
+			}
+		}
+
+	}
+
+	synchronized void recordRequest(Integer sourceNodeId , long timestamp )
+	{
+		if(inCS || (CSrequired && ReqTimeStamp < timestamp) || (CSrequired && ReqTimeStamp == timestamp && NI.id < sourceNodeId) ) 
+		{
+			keyRequired[sourceNodeId] = true;
+			/*try {
 				wait();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 		}
-		//now give
-		sendGrant(sourceNodeId);
+		else
+		{
+			sendGrant(sourceNodeId);
+		}
 	}
+
 	public synchronized boolean receive(StreamMsg m){
 		CurTimeStamp = Math.max(m.timestamp,CurTimeStamp);
 		CurTimeStamp++;
 		if(m.type == MsgType.request) {
-			waitAndSendGrant(m.sourceNodeId , m.timestamp);
+			recordRequest(m.sourceNodeId , m.timestamp);
 			}
 		else if(m.type == MsgType.grant || m.type == MsgType.req_grant) {
 			keys[m.sourceNodeId]=true;
 			notifyAll();
 			if(m.type == MsgType.req_grant)
 			{
-				waitAndSendGrant(m.sourceNodeId , m.timestamp);
+				recordRequest(m.sourceNodeId , m.timestamp);
 			}
 		}
 		return false;	
