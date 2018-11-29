@@ -50,7 +50,8 @@ cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
 	p=$( echo $line | awk '{ print $1 }' )
         host=$( echo $line | awk '{ print $2 }' )
 	
-	gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE; exec bash" &
+	gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE;" &
+	#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE; exec bash" &
 
         n=$(( n + 1 ))
     done

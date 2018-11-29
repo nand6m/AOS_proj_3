@@ -32,6 +32,9 @@ public class Application extends Thread {
 
 	}
 
+	public synchronized void receive(StreamMsg m)
+
+
     	@Override
     	public void run(){
 		//System.out.println(nodes);
@@ -63,18 +66,18 @@ public class Application extends Thread {
 			}
         	}
         	throughPut_endTime = System.currentTimeMillis();
-            System.out.println("Average Response Time = " + (total_response_time/num_iteration) +"ms\n");
-			System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms for CS time of " + c + "ms\n");
-			try{
+       		System.out.println("Average Response Time = " + (total_response_time/num_iteration) +"ms\n");
+		System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms for CS time of " + c + "ms\n");
+		try{
 			//Writing results to file (i.e. output.txt) - Not yet tested
 			FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // Here 'true' indicates that new data would be appended to file
 
 			fw.write( nodes + ", " + c + ", " + d + ", " + (total_response_time/num_iteration) + ", " + (throughPut_endTime - throughPut_startTime) + "\n");
 			fw.flush();
 			fw.close();
-			}catch( IOException ie){
-				ie.printStackTrace();
-			}
+		}catch( IOException ie){
+			ie.printStackTrace();
+		}
     	}
 }
 

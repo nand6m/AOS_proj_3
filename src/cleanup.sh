@@ -18,6 +18,9 @@ CONFIGREMOTE=$PROJDIR/src/$CONFIGNAME
 
 n=0
 
+#echo $$
+#echo $BASHPID
+
 cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
 (
     read line
@@ -38,6 +41,6 @@ cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
    
 )
 
-for i in `ps aux | grep bash | cut -s  -d' ' -f6`; do if [[ $i != $$ ]]; then echo $i; fi; done
+#for i in `ps aux | grep 'bash' | cut -s  -d' ' -f2`; do if [[ $i != $$ ]] || [[ $i != $BASHPID ]]; then echo $i; fi; done
 
 echo "Cleanup complete"

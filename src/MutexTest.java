@@ -99,7 +99,7 @@ class MutexTest extends Thread
 		try{
 			for(int j = 0; j < iterations; j++)
 			{
-				//rcm.cs_enter();
+				rcm.cs_enter();
 				if(id != 0)
 				{
 					request_i();
@@ -115,7 +115,7 @@ class MutexTest extends Thread
 					sets++;
 					System.out.print("Value of i after " + sets + " sets is " + i + "\r");
 				}
-				//rcm.cs_leave();
+				rcm.cs_leave();
 			}
 			Thread.sleep(90000);
 		}
@@ -123,7 +123,7 @@ class MutexTest extends Thread
 			e.printStackTrace();
 		}
 		if(id == 0){
-			System.out.println("Value of i after testing : "+ i);
+			System.out.println("\nValue of i after testing : "+ i);
 		}
 	}
 }
