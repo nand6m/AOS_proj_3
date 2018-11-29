@@ -6,6 +6,9 @@ class MutexTest extends Thread
 	int iterations;
 	Sender coordinator;
 	RCMutex rcm;
+	volatile boolean isWaiting = false;
+	volatile boolean isSetting = false;
+	int sets = 0;
 
 	public MutexTest(int id, int iterations, RCMutex rcm)
 	{
@@ -20,7 +23,7 @@ class MutexTest extends Thread
 		this.coordinator = s;
 	}
 
-	public boolean receive(StreamMsg m, Sender s)
+	public synchronized boolean receive(StreamMsg m, Sender s)
 	{
 		if(m.type == MsgType.get_i)
 		{
@@ -29,26 +32,65 @@ class MutexTest extends Thread
 		else if(m.type == MsgType.set_i)
 		{
 			i = Integer.parseInt(m.message);
-			System.out.println("Value of i is " + i);
+			sets++;
+			System.out.print("Value of i after " + sets + " sets is " + i + "\r");
+			isWaiting = false;
+			notifyAll();
+			if(id == 0)
+			{
+				send_done(s);
+			}
+		}
+		else if(m.type == MsgType.done_i)
+		{
+			isSetting = false;
+			notifyAll();
+			//System.out.println("RECEIVED DONE........");
 		}
 		return false;
 	}
 
-	public void send_i(Sender s)
+	public void send_done(Sender s) 
 	{
+		StreamMsg reply = new StreamMsg();
+		reply.sourceNodeId = id;
+		reply.type = MsgType.done_i;
+		reply.message = Integer.toString(i);
+		s.send(reply);
+		//System.out.println("SEND DONE............");
+	}
+
+	public synchronized void send_i(Sender s) 
+	{
+		isSetting = true;
 		StreamMsg reply = new StreamMsg();
 		reply.sourceNodeId = id;
 		reply.type = MsgType.set_i;
 		reply.message = Integer.toString(i);
 		s.send(reply);
+		if(id == 0) return;
+		try{
+			while(isSetting)
+			{
+				wait();
+			}
+		}
+		catch(Exception e){e.printStackTrace();}
 	}
 
-	public void request_i()
+	public synchronized void request_i()
 	{
+		isWaiting = true;
 		StreamMsg m = new StreamMsg();
 		m.sourceNodeId = id;
 		m.type = MsgType.get_i;
 		coordinator.send(m);
+		//System.out.println("REQUESTED I");
+		while(isWaiting){
+			try{wait();}   
+			catch(InterruptedException ie){ie.printStackTrace();}
+		}
+		//System.out.println("RECEIVED I");		
 	}
 
 	@Override
@@ -57,24 +99,31 @@ class MutexTest extends Thread
 		try{
 			for(int j = 0; j < iterations; j++)
 			{
-				rcm.cs_enter();
+				//rcm.cs_enter();
 				if(id != 0)
 				{
 					request_i();
 				}
 				i = i + 1;
-				Thread.sleep(100);			
+				Thread.sleep(10);			
 				if(id != 0)
 				{
 					send_i(coordinator);
 				}
-				rcm.cs_leave();
+				else
+				{
+					sets++;
+					System.out.print("Value of i after " + sets + " sets is " + i + "\r");
+				}
+				//rcm.cs_leave();
 			}
-			Thread.sleep(10000);
-			System.out.println("Final value of i = " + i);
+			Thread.sleep(90000);
 		}
 		catch (Exception e){
 			e.printStackTrace();
+		}
+		if(id == 0){
+			System.out.println("Value of i after testing : "+ i);
 		}
 	}
 }

@@ -12,8 +12,9 @@ public class RCMutex implements MsgListener {
 	boolean keyRequired[];
 	HashMap<Integer, Sender> senders;
 
-	public void addSender(int neighbor, Sender s) {
+	public synchronized void addSender(int neighbor, Sender s) {
 		senders.put(neighbor, s);
+		notifyAll();
 		//System.out.println("Adding "+ neighbor+ " socket to senders");    	
 	}
 
@@ -49,9 +50,10 @@ public class RCMutex implements MsgListener {
 		ReqTimeStamp = CurTimeStamp + 1;
 		CSrequired = true;
 		sendMissingRequest();	
+		inCS = hasAllKeys();
 		while(!inCS) {
+			wait();
 			inCS = hasAllKeys();
-			if(!inCS) wait();
 		}
 	}
 	public synchronized void cs_leave() {
@@ -114,6 +116,16 @@ public class RCMutex implements MsgListener {
 		msg.sourceNodeId = NI.id;
 		msg.timestamp = ReqTimeStamp;
 		//System.out.println(NI.id+" Sending "+ msg.type +" to "+id +" ,timestamp: "+msg.timestamp);
+		try{
+			while(!senders.containsKey(id))
+			{ 
+				wait();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		senders.get(id).send(msg);
 		//ReqTimeStamp++;
 		CurTimeStamp++;
@@ -130,6 +142,16 @@ public class RCMutex implements MsgListener {
 		msg.sourceNodeId = NI.id;
 		msg.timestamp = CurTimeStamp;
 		//System.out.println(NI.id+" Sending "+ msg.type +" to "+id +" ,timestamp: "+ msg.timestamp);
+		try{
+			while(!senders.containsKey(id))
+			{ 
+				wait();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		senders.get(id).send(msg);
 		CurTimeStamp++;
 	}

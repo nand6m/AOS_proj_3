@@ -153,7 +153,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 	{
 		if(m.type == MsgType.initiate)
 		{
-			//System.out.println("Received initiate from " + m.sourceNodeId);
+			System.out.println("Received initiate from " + m.sourceNodeId);
 			setNeighborId(m.sourceNodeId);
 			/*try{
 				Thread.sleep(2000);
@@ -174,7 +174,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		{
 			rcm.receive(m);
 		}
-		else if(m.type == MsgType.set_i || m.type == MsgType.get_i)
+		else if(m.type == MsgType.set_i || m.type == MsgType.get_i || m.type == MsgType.done_i)
 		{
 			mt.receive(m, this);
 		}
