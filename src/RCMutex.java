@@ -6,6 +6,14 @@ public class RCMutex implements MsgListener {
 	long ReqTimeStamp=0;
 	long CurTimeStamp = 0;
 
+	double messagesReceived = 0;
+	double csRequests = 0;
+	
+	public synchronized double getAverageMessageComplexity()
+	{
+		return messagesReceived/csRequests;	
+	}
+
 	//StreamMsg msg=new StreamMsg();
 	NodeInfo NI;
 	boolean keys[];
@@ -47,6 +55,7 @@ public class RCMutex implements MsgListener {
 
 	public synchronized void cs_enter() throws InterruptedException
 	{	
+		csRequests++;
 		ReqTimeStamp = CurTimeStamp + 1;
 		CSrequired = true;
 		sendMissingRequest();	
@@ -94,6 +103,7 @@ public class RCMutex implements MsgListener {
 	}
 
 	public synchronized boolean receive(StreamMsg m){
+		messagesReceived++;
 		CurTimeStamp = Math.max(m.timestamp,CurTimeStamp);
 		CurTimeStamp++;
 		if(m.type == MsgType.request) {
