@@ -15,6 +15,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 	//static Broadcast broadcast;
 	static RCMutex rcm;
 	static MutexTest mt;
+	static Application app;
 	boolean isRunning;
 	ObjectOutputStream oos;
 	Integer neighborId;
@@ -33,6 +34,11 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 	static void setRCMTester(MutexTest m)
 	{
 		mt = m;
+	}
+
+	static void setApplication(Application a)
+	{
+		app = a;
 	}
 
 //	static void setRCMTester(MutexTest)
@@ -55,9 +61,14 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		{
 			rcm.addSender(neighborId, this);
 		}
+		if(app != null)
+		{
+			app.addSender(neighborId, this);
+		}	
 		if(i == 0)
 		{
 			mt.setCoordinator(this);
+			app.setCoordinator(this);	
 		}
 	}
 
@@ -177,6 +188,10 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		else if(m.type == MsgType.set_i || m.type == MsgType.get_i || m.type == MsgType.done_i)
 		{
 			mt.receive(m, this);
+		}
+		else if(m.type == MsgType.initiateApplication || m.type == MsgType.metricReport)
+		{
+			app.receive(m);
 		}
 		return !isRunning;
 	}

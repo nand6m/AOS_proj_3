@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 public class Application extends Thread {
 	private static long throughPut_startTime = 0;
@@ -15,72 +16,85 @@ public class Application extends Thread {
 	private static long response_endTime = 0;
 	private static long systemThroughput = 0;
 	int num_iteration=0;
-	int nodes=0;
-
+	int nodes;
+	int nodeId;
+	Sender coordinator;
 	int reportsReceived ;
 	double msgComplexity, totalResponseTime;
-
-    ExponentialDistribution d_ed, c_ed;
+	int c_mean,d_mean;
+	
+  	ExponentialDistribution d_ed, c_ed;
 	RCMutex rcm;
-	File f = new File("/home/010/k/kx/kxv170930/AOS_proj_3/src/output.txt"); //Give file path in DC machine
-    	
+	File f; //Give file path in DC machine
+    	HashMap<Integer, Sender> senders;
+
+	public synchronized void addSender(int neighbor, Sender s) {
+		senders.put(neighbor, s);
+	}
+
 	//Constructor
     	public Application (int nodes, int d_mean, int c_mean, int num_iteration, RCMutex rcminput, int nodeId){
-        d_ed = new ExponentialDistribution(d_mean);
-      	c_ed = new ExponentialDistribution(c_mean);
-       	this.num_iteration=num_iteration;
+       		d_ed = new ExponentialDistribution(d_mean);
+      		c_ed = new ExponentialDistribution(c_mean);
+      	 	this.num_iteration=num_iteration;
 		this.rcm = rcminput;	
 		this.nodes = nodes;
 		this.nodeId = nodeId;
-
+		this.c_mean = c_mean;
+		this.d_mean = d_mean;
 		this.rcm = rcminput;
-		File f = new File("/output.txt"); //Give file path in DC machine
-		StreamMsg msg = null;
+		f = new File("output.txt"); //Give file path in DC machine
+		senders = new HashMap<Integer, Sender>();
+	}
+
+	void recordMetrics(double messageComplexity, double responseTime)
+	{
+		reportsReceived++;
+		msgComplexity += messageComplexity; 
+		totalResponseTime += responseTime;
+		if(reportsReceived == nodes)
+		{
+			msgComplexity /= nodes;
+			totalResponseTime /= nodes;
+			throughPut_endTime = System.currentTimeMillis();
+			systemThroughput = throughPut_endTime - throughPut_startTime;
+			try{
+				//Writing results to file (i.e. output.txt) - Not yet tested
+				FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // Here 'true' indicates that new data would be appended to file		
+				System.out.println("About to write " + nodes + ", " + c_mean + ", " + d_mean + ", " + msgComplexity + ", " + totalResponseTime + ", " + systemThroughput);
+				fw.write( nodes + ", " + c_mean + ", " + d_mean + ", " + msgComplexity + ", " + totalResponseTime + ", " + systemThroughput + "\n");
+				fw.flush();
+				fw.close();
+			}
+			catch(IOException ie){
+				ie.printStackTrace();
+			}
+		}
 	}
 
 	public synchronized void receive(StreamMsg m)
 	{
 		if(m.type == MsgType.initiateApplication) //Application
 		{
-			run();
+			started = true;
+			notifyAll();
 		}
 
 		if(m.type == MsgType.metricReport) // Initiate Application to StreamMsg
 		{
-			reportsReceived++;
 			String[] msgContent = m.message.split(","); // Message contains msgComplexity & totalResponseTime separated by ","
-			msgComplexity += Double.parseDouble(msgContent[0]); // Doubt ?
-			totalResponseTime += Double.parseDouble(msgContent[1]) ;
-
-			if(reportsReceived == nodes)
-			{
-				msgComplexity /= nodes;
-				totalResponseTime /= nodes;
-				throughPut_endTime = System.currentTimeMillis();
-				systemThroughput = throughPut_endTime - throughPut_startTime;
-				try{
-					//Writing results to file (i.e. output.txt) - Not yet tested
-					FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // Here 'true' indicates that new data would be appended to file		
-					fw.write( nodes + ", " + c + ", " + d + ", " + msgComplexity + ", " + totalResponseTime + ", " + systemThroughput + "\n");
-					fw.flush();
-					fw.close();
-				}
-				catch(IOException ie){
-					ie.printStackTrace();
-				}
-			}
+			recordMetrics(Double.parseDouble(msgContent[0]), Double.parseDouble(msgContent[1]));
 		}
 	}
 
 	public void setCoordinator(Sender s) // setCoordinator - copied from MutexTest.java
 	{
 		this.coordinator = s;
-		
 	}
 
-
+	boolean started = false;
     	@Override
-    	public void run(){
+    	public synchronized void run(){
 		//System.out.println(nodes);
 		long d = Math.round(d_ed.sample());
 		long c = Math.round(c_ed.sample());
@@ -88,50 +102,54 @@ public class Application extends Thread {
 		long total_response_time = 0;
 		if(nodeId == 0)
 		{
-			throughPut_startTime = System.currentTimeMillis();	
+			throughPut_startTime = System.currentTimeMillis();
+			StreamMsg msg = new StreamMsg();
+			msg.type = MsgType.initiateApplication;
+			msg.sourceNodeId = nodeId;
+			for(Sender sender : senders.values())
+			{
+				 sender.send(msg);
+			}
 		}
-        	for(int i=0; i < num_iteration; i++){
-            		System.out.println(nodes+" Requesting to enter Critical section");
-           	 	response_startTime = System.currentTimeMillis();
-			try {
+		try{
+			if(nodeId != 0)
+			{ 
+				while(!started)
+				{
+					 wait();
+				}
+			}
+        		for(int i=0; i < num_iteration; i++)
+			{
+            			//System.out.println(nodes+" Requesting to enter Critical section");
+           	 		response_startTime = System.currentTimeMillis();
         			rcm.cs_enter();
-				System.out.println(nodes+" Starting Critical section");
+				//System.out.println(nodes+" Starting Critical section");
 				//Consume some resource
 				Thread.sleep(c);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+         	   		//System.out.println(nodes+" Ending Critical section");
+          			rcm.cs_leave();
+            			response_endTime = System.currentTimeMillis();
+				total_response_time += response_endTime - response_startTime;
+        			Thread.sleep(d);
 			}
-            		System.out.println(nodes+" Ending Critical section");
-          		rcm.cs_leave();
-            		response_endTime = System.currentTimeMillis();
-			total_response_time += response_endTime - response_startTime;
-            		try {
-				Thread.sleep(d);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		if(nodeId == 0)
+		{
+			recordMetrics(rcm.getAverageMessageComplexity(), total_response_time);
+		}
+		else
+		{
+			StreamMsg msg = new StreamMsg();
 			msg.sourceNodeId = nodeId;
-			msg.message = msgComplexity +","+ totalResponseTime;
+			msg.message = rcm.getAverageMessageComplexity() +","+ total_response_time;
 			msg.type = MsgType.metricReport;
 			this.coordinator.send(msg); // msg with msgComplexity + totalResponseTime
-
-
-    	//throughPut_endTime = System.currentTimeMillis();
-       	//System.out.println("Average Response Time = " + (total_response_time/num_iteration) +"ms\n");
-		//System.out.println("Throughput = " + (throughPut_endTime - throughPut_startTime) +"ms for CS time of " + c + "ms\n");
-		// try{
-		// 	//Writing results to file (i.e. output.txt) - Not yet tested
-		// 	FileWriter fw = new FileWriter(f.getAbsoluteFile(), true); // Here 'true' indicates that new data would be appended to file
-
-		// 	//fw.write( nodes + ", " + c + ", " + d + ", " + (total_response_time/num_iteration) + ", " + (throughPut_endTime - throughPut_startTime) + "\n");
-		// 	fw.flush();
-		// 	fw.close();
-		// }catch( IOException ie){
-		// 	ie.printStackTrace();
-		// }
+		}
+		System.out.println(rcm.getAverageMessageComplexity() + " message complexity computed");
     	}
 }
 

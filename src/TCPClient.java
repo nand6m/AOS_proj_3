@@ -24,7 +24,7 @@ public class TCPClient {
 				}
 				Socket client = null;
 				try {
-					System.out.println("Address-------"+address+" port-----"+port);
+					//System.out.println("Address-------"+address+" port-----"+port);
 					client = new Socket(address,port);
 				}
 				catch (IOException e) {
