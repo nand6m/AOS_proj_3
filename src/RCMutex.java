@@ -119,6 +119,11 @@ public class RCMutex implements MsgListener {
 		}
 		return false;	
 	}
+	
+	public synchronized void receiveKey(int neighborId)
+	{
+		keys[neighborId] = true;
+	}
 
 	public synchronized void sendRequest(int id) {
 		StreamMsg msg=new StreamMsg();

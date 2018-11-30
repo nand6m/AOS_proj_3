@@ -122,8 +122,7 @@ class MutexTest extends Thread
 		catch (Exception e){
 			e.printStackTrace();
 		}
-		if(id == 0){
-			System.out.println("\nValue of i after testing : "+ i);
-		}
+		System.out.println("Value of i after " + sets + " sets is : "+ i);
+		System.out.println("Testing over");
 	}
 }

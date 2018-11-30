@@ -24,9 +24,11 @@ public class Main {
 		System.out.println(NIobj.id+ " All connections done!");
 		Thread.sleep(1000); // Sleeping so that message manager can send initiate message before sending any other message
 		//TODO remove above sleep
-		System.out.println(NIobj.id +" :id");
+		//System.out.println(NIobj.id +" :id");
 		//mt.run();
 		app.run();
+		
+		MessageManager.joinAllThreads();
 	}
 }
 	

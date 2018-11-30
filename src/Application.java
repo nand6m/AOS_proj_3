@@ -3,13 +3,11 @@
 import org.apache.commons.math3.distribution.*;
 import java.lang.Math;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 
-public class Application extends Thread {
+public class Application extends Thread implements MsgListener{
 	private static long throughPut_startTime = 0;
 	private static long throughPut_endTime = 0;
 	private static long response_startTime = 0;
@@ -22,6 +20,7 @@ public class Application extends Thread {
 	int reportsReceived ;
 	double msgComplexity, totalResponseTime;
 	int c_mean,d_mean;
+	boolean finished = false;
 	
   	ExponentialDistribution d_ed, c_ed;
 	RCMutex rcm;
@@ -69,10 +68,12 @@ public class Application extends Thread {
 			catch(IOException ie){
 				ie.printStackTrace();
 			}
+			MessageManager.terminateAll();
 		}
 	}
 
-	public synchronized void receive(StreamMsg m)
+	@Override
+	public synchronized boolean receive(StreamMsg m)
 	{
 		if(m.type == MsgType.initiateApplication) //Application
 		{
@@ -85,6 +86,7 @@ public class Application extends Thread {
 			String[] msgContent = m.message.split(","); // Message contains msgComplexity & totalResponseTime separated by ","
 			recordMetrics(Double.parseDouble(msgContent[0]), Double.parseDouble(msgContent[1]));
 		}
+		return false;
 	}
 
 	public void setCoordinator(Sender s) // setCoordinator - copied from MutexTest.java
@@ -93,8 +95,9 @@ public class Application extends Thread {
 	}
 
 	boolean started = false;
-    	@Override
-    	public synchronized void run(){
+    	
+	@Override
+	public synchronized void run(){
 		//System.out.println(nodes);
 		long d = Math.round(d_ed.sample());
 		long c = Math.round(c_ed.sample());
@@ -119,20 +122,25 @@ public class Application extends Thread {
 					 wait();
 				}
 			}
-        		for(int i=0; i < num_iteration; i++)
+        	for(int i=0; i < num_iteration; i++)
 			{
             			//System.out.println(nodes+" Requesting to enter Critical section");
            	 		response_startTime = System.currentTimeMillis();
         			rcm.cs_enter();
-				//System.out.println(nodes+" Starting Critical section");
-				//Consume some resource
-				Thread.sleep(c);
-         	   		//System.out.println(nodes+" Ending Critical section");
-          			rcm.cs_leave();
-            			response_endTime = System.currentTimeMillis();
-				total_response_time += response_endTime - response_startTime;
+					//System.out.println(nodes+" Starting Critical section");
+					//Consume some resource
+					Thread.sleep(c);
+	         		//System.out.println(nodes+" Ending Critical section");
+					rcm.cs_leave();
+        			response_endTime = System.currentTimeMillis();
+        			total_response_time += response_endTime - response_startTime;
         			Thread.sleep(d);
+        			if(i % 10 == 0)
+        			{
+        				System.out.print("Running application at iteration# " + i + "\r");
+        			}
 			}
+        	System.out.println("Running application at iteration# " + num_iteration + " finished");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -148,8 +156,14 @@ public class Application extends Thread {
 			msg.message = rcm.getAverageMessageComplexity() +","+ total_response_time;
 			msg.type = MsgType.metricReport;
 			this.coordinator.send(msg); // msg with msgComplexity + totalResponseTime
+			MessageManager.terminateAll();
 		}
 		System.out.println(rcm.getAverageMessageComplexity() + " message complexity computed");
-    	}
+	}
+
+	@Override
+	public boolean isTerminated() {
+		return false;
+	}
 }
 

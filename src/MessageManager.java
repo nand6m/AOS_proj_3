@@ -41,11 +41,6 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		app = a;
 	}
 
-//	static void setRCMTester(MutexTest)
-//	{
-//	}
-
-
 	static void setRCMutex(RCMutex rcminput)
 	{
 		rcm = rcminput;
@@ -89,73 +84,28 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		ObjectInputStream ois = null;
 		//DataInputStream dis=null;
 		try {
-			ois = new ObjectInputStream(socket.getInputStream());
-			//System.out.println("Message received");		
-		}
-		catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		initiate();	
-		while(isRunning){
-			try {			
+			initiate();
+			ois = new ObjectInputStream(socket.getInputStream());		
+			while(isRunning){
 				StreamMsg msg;
-				msg=(StreamMsg) ois.readObject();		
+				msg=(StreamMsg) ois.readObject();
+				//System.out.println("Message received");
 				receive(msg);
 			}
-			catch(SocketException se){
+			if(!terminateSent)
+			{
+				terminate();
 			}
-			catch(EOFException eofe){
-				/*if(l.isTerminated()){
-					//if program has terminated gracefully then cleanup
-					isRunning = false;
-					try{
-						socket.close();
-					}
-					catch(IOException ioe){
-						ioe.printStackTrace();
-					}
-				}
-				else{*/
-					//else show the exception
-					System.out.println("Exception from socket id: " + socket.getRemoteSocketAddress());
-					eofe.printStackTrace();
-					System.exit(2);
-				//}
-			}
-			catch(StreamCorruptedException e) {
-				System.out.println("Exception from socket id: " + socket.getRemoteSocketAddress());
-				e.printStackTrace();
-				System.exit(2);
-			}
-			catch (IOException e) {
-				System.out.println("Exception from socket id: " + socket.getRemoteSocketAddress());
-				e.printStackTrace();
-				System.exit(2);
-			}
-			catch (ClassNotFoundException e) {
-				System.out.println("Exception from socket id: " + socket.getRemoteSocketAddress());
-				e.printStackTrace();
-				System.exit(2);
-			} 				
-		}
-		try{
 			socket.close();
 		}
-		catch(IOException ioe){
-			ioe.printStackTrace();
-		}
-	}
-
-	static ArrayList<MessageManager> activeManagers = new ArrayList<MessageManager>();
-
-	public static void joinAllThreads(){
-		try{
-			for(int i = 0; i < activeManagers.size(); i++){
-				activeManagers.get(i).join();
-			}
-		}
-		catch(InterruptedException e){
+		catch(Exception e){
+			System.out.println("Exception from socket id: " + socket.getRemoteSocketAddress());
 			e.printStackTrace();
+			System.exit(2);
+		}
+		if(rcm != null)
+		{
+			rcm.receiveKey(neighborId);
 		}
 	}
 
@@ -166,14 +116,6 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		{
 			//System.out.println("Received initiate from " + m.sourceNodeId);
 			setNeighborId(m.sourceNodeId);
-			/*try{
-				Thread.sleep(2000);
-			}
-			catch(InterruptedException e)
-			{
-				e.printStackTrace();
-				System.exit(2);
-			}*/
 		}
 		/*else if(m.type == MsgType.PACK || m.type == MsgType.NACK || m.type == MsgType.parentRequest){
 			stn.receive(m);
@@ -193,6 +135,10 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		{
 			app.receive(m);
 		}
+		else if(m.type == MsgType.terminate)
+		{
+			isRunning = false;
+		}
 		return !isRunning;
 	}
 
@@ -202,6 +148,25 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		return !isRunning;
 	}
 
+	static ArrayList<MessageManager> activeManagers = new ArrayList<MessageManager>();
+	public static void joinAllThreads(){
+		try{
+			for(int i = 0; i < activeManagers.size(); i++){
+				activeManagers.get(i).join();
+			}
+		}
+		catch(InterruptedException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public static void terminateAll()
+	{
+		for(int i = 0; i < activeManagers.size(); i++) {
+			activeManagers.get(i).terminate();
+		}
+	}
+	
 	void initiate()
 	{
 		//System.out.println("Sending initiate message to " + socket.getRemoteSocketAddress().toString());
@@ -209,6 +174,17 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		m.type = MsgType.initiate;
 		m.sourceNodeId = NIobj.id; 
 		send(m);
+	}
+	
+	boolean terminateSent = false;
+	synchronized void terminate()
+	{
+		if(terminateSent) return;
+		StreamMsg m = new StreamMsg();
+		m.type = MsgType.terminate;
+		m.sourceNodeId = NIobj.id; 
+		send(m);
+		terminateSent = true;
 	}
 
 	@Override
