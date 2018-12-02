@@ -6,13 +6,18 @@ import java.io.IOException;
 
 public class ReadConfigFile {
 
-	public static NodeInfo readConfigFile(String name,int nodeId) throws IOException{
+	public static NodeInfo readConfigFile(String name,int nodeId) throws IOException
+	{
+		return readConfigFile(name, nodeId, 0, 0, 0);
+	}
+	
+	public static NodeInfo readConfigFile(String name,int nodeId, int nodeCount, int d_mean, int c_mean) throws IOException{
 		NodeInfo file=new NodeInfo();
 		int node_count = 0,next = 0;
 		// Keeps track of current node
 		int curNode = 0;
 		int NumNodes=0;
-		//int adjMtx[][]=null;
+		//int adjMtx[][] = null;
 		file.id = nodeId;
 		String fileName = name;
 		System.out.println(fileName);
@@ -34,19 +39,12 @@ public class ReadConfigFile {
 				}
 
 				if(next == 0){
-					NumNodes=Integer.parseInt(config_input[0]);
-					
-					file.numOfNodes = Integer.parseInt(config_input[0]);
-					file.d_mean=Integer.parseInt(config_input[1]);
-					
-					file.c_mean=Integer.parseInt(config_input[2]);
+					NumNodes = (nodeCount == 0) ? Integer.parseInt(config_input[0]) : nodeCount;
+					file.numOfNodes = NumNodes;
+					file.d_mean = (d_mean == 0) ? Integer.parseInt(config_input[1]) : d_mean;
+					file.c_mean = (c_mean == 0) ? Integer.parseInt(config_input[2]) : c_mean;
 					file.num_iteration=Integer.parseInt(config_input[3]);
 					//System.out.println("Num of Nodes "+file.numOfNodes+" Inter-req-delay "+ file.d_mean + " CS exec_time "+file.c_mean+ " Req_count "+file.num_iteration);
-//					mapFile.minPerActive = Integer.parseInt(config_input[1]);
-//					mapFile.maxPerActive = Integer.parseInt(config_input[2]);
-//					mapFile.minSendDelay = Integer.parseInt(config_input[3]);
-//					mapFile.snapshotDelay = Integer.parseInt(config_input[4]);
-//					mapFile.maxNumber = Integer.parseInt(config_input[5]);
 					file.adjMtx = new int[NumNodes][NumNodes];
 					file.ClientConnectionCount= new int[file.numOfNodes];
 					next++;
@@ -65,7 +63,7 @@ public class ReadConfigFile {
 				  
 					file.nodes.add(new Node(Integer.parseInt(config_input[0]),config_input[1],Integer.parseInt(config_input[2])));
 					node_count++;
-					for(Integer i = 1 ; i < NumNodes ; i++){
+					for(Integer i = 0 ; i < NumNodes ; i++){
 						if(curNode != i) {
 							//System.out.println(Integer.parseInt(config_input[i]));
 							file.adjMtx[curNode][i] = 1;

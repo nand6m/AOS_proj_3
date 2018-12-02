@@ -1,10 +1,10 @@
 import java.util.ArrayList;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.StreamCorruptedException;
+//import java.io.StreamCorruptedException;
 import java.net.Socket;
-import java.net.SocketException;
-import java.io.EOFException;
+//import java.net.SocketException;
+//import java.io.EOFException;
 import java.io.ObjectOutputStream;
 
 public class MessageManager extends Thread implements MsgListener, Sender{
@@ -101,7 +101,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		catch(Exception e){
 			System.out.println("Exception from socket id: " + socket.getRemoteSocketAddress());
 			e.printStackTrace();
-			System.exit(2);
+			//System.exit(2);
 		}
 		if(rcm != null)
 		{

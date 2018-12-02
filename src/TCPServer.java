@@ -39,8 +39,9 @@ public class TCPServer {
 		int count=0;
 		//try{	
 			//System.out.println(NIobj.id+" --> "+NIobj.channels.size());
-			while (NIobj.ClientConnectionCount[NIobj.id]!=NIobj.channels.size()) {
-				try {   //System.out.println(NIobj.id+" --> "+NIobj.ClientConnectionCount[NIobj.id]+","+NIobj.channels.size());
+			while (NIobj.ClientConnectionCount[NIobj.id] != NIobj.channels.size()) {
+				try {
+					//System.out.println(NIobj.id+" --> "+NIobj.ClientConnectionCount[NIobj.id]+","+NIobj.channels.size());
 					socket = listener.accept();
 					count++;
 					//InetAddress address=socket.getInetAddress();
