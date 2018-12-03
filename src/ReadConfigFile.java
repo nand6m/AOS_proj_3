@@ -20,7 +20,7 @@ public class ReadConfigFile {
 		//int adjMtx[][] = null;
 		file.id = nodeId;
 		String fileName = name;
-		System.out.println(fileName);
+		//System.out.println(fileName);
 		String line = null;
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(fileName));

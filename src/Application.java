@@ -90,6 +90,7 @@ public class Application extends Thread implements MsgListener{
 		if(m.type == MsgType.initiateApplication) //Application
 		{
 			started = true;
+			System.out.println("Starting application from node #" + nodeId);
 			notifyAll();
 		}
 

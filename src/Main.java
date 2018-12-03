@@ -30,8 +30,7 @@ public class Main {
 		new TCPClient(NIobj, NIobj.id);
 		server.listenforinput();
 		System.out.println(NIobj.id+ " All connections done!");
-		Thread.sleep(1000); // Sleeping so that message manager can send initiate message before sending any other message
-		//TODO remove above sleep
+		MessageManager.waitForAllInitiate();
 		//System.out.println(NIobj.id +" :id");
 		//mt.run();
 		app.run();

@@ -1,5 +1,5 @@
 #!/bin/bash
-./cleanup.sh
+./cleanup.sh $1
 
 # Change this to your netid
 netid=sxd167930
@@ -9,11 +9,15 @@ DCDIR=/people/cs/s/$netid
 RELDIR=RCMutex/AOS_proj_3
 PROJDIR=$DCDIR/$RELDIR
 
-# Directory where the config file is located on your local system
-#CONFIGNAME=config_grade.txt
-#CONFIGNAME=config_20.txt
-#CONFIGNAME=config_10nodes.txt
-CONFIGNAME=config.txt
+if [[ $# -ge 1 ]]; then
+	CONFIGNAME=$1
+else
+	#Directory where the config file is located on your local system
+	CONFIGNAME=config.txt
+	#CONFIGNAME=config_grade.txt
+	#CONFIGNAME=config_20.txt
+	#CONFIGNAME=config_10nodes.txt
+fi
 CONFIGLOCAL=$HOME/Desktop/$RELDIR/src/$CONFIGNAME
 CONFIGREMOTE=$PROJDIR/src/$CONFIGNAME
 
@@ -36,15 +40,19 @@ scp *.txt $netid@dc01.utdallas.edu:$RELDIR/src/
 ssh $netid@dc01.utdallas.edu "./$RELDIR/src/Compile.sh"
 echo 'Deployment complete'
 
-n=0
+i=0
 
+oldoutputlines=$(ssh dc01 'wc -l < output.txt')
+echo $oldoutputlines
+sleep 5s
 cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
 (
     read line
-    i=$( echo $line | awk '{ print $1 }' )
-    echo $i
+    n=$( echo $line | awk '{ print $1 }' )
+    #echo $n
+    #sleep 5s
     p=0
-    while [[ $n -lt $i ]]
+    while [[ $i -lt $n ]]
     do
     	read line
 	p=$( echo $line | awk '{ print $1 }' )
@@ -52,9 +60,16 @@ cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
 	
 	#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE;" &
 	#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE; exec bash" &
-	ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host 'java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE' &
+	ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host "java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE" &
 
-        n=$(( n + 1 ))
+       i=$(( i + 1 ))
     done
 )
+newoutputlines=$oldoutputlines
+while [[ $newoutputlines -le $oldoutputlines ]]
+do
+	sleep 20s
+	newoutputlines=$(ssh dc01 'wc -l <output.txt')
+done
 #sleep 2m
+

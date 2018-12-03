@@ -109,13 +109,16 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 		}
 	}
 
+	boolean initiated = false;
 	@Override
-	public boolean receive(StreamMsg m)
+	public synchronized boolean receive(StreamMsg m)
 	{
 		if(m.type == MsgType.initiate)
 		{
 			//System.out.println("Received initiate from " + m.sourceNodeId);
 			setNeighborId(m.sourceNodeId);
+			initiated = true;
+			notifyAll();
 		}
 		/*else if(m.type == MsgType.PACK || m.type == MsgType.NACK || m.type == MsgType.parentRequest){
 			stn.receive(m);
@@ -166,6 +169,26 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 			activeManagers.get(i).terminate();
 		}
 	}
+
+	public static void waitForAllInitiate()
+	{
+		for(int i = 0; i < activeManagers.size(); i++) {
+			activeManagers.get(i).waitForInitiate();
+		}
+	}
+
+	synchronized void waitForInitiate()
+	{
+		try{
+			while(!initiated)
+			{ 
+				wait();
+			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	
 	void initiate()
 	{
@@ -190,15 +213,20 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 	@Override
 	public synchronized void send(StreamMsg m)
 	{
-		if(socket.isClosed()){
-			//System.out.println("Socket closed");
-			return;
-		}
 		try {
+			while(!initiated)
+			{
+				if(m.type == MsgType.initiate) break;
+				wait();
+			}
+			if(socket.isClosed()){
+				//System.out.println("Socket closed");
+				return;
+			}
 			oos.writeObject(m);
 			oos.flush();
 		} 
-		catch (IOException e)
+		catch (Exception e)
 		{
 			//System.out.println("cant send this msg");
 			//e.printStackTrace();
