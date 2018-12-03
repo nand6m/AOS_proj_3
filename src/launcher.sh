@@ -42,34 +42,43 @@ echo 'Deployment complete'
 
 i=0
 
-oldoutputlines=$(ssh dc01 'wc -l < output.txt')
-echo $oldoutputlines
-sleep 5s
-cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
-(
-    read line
-    n=$( echo $line | awk '{ print $1 }' )
-    #echo $n
-    #sleep 5s
-    p=0
-    while [[ $i -lt $n ]]
-    do
-    	read line
-	p=$( echo $line | awk '{ print $1 }' )
-        host=$( echo $line | awk '{ print $2 }' )
-	
-	#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE;" &
-	#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE; exec bash" &
-	ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host "java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE" &
+function outputlines () {
+	ssh dc01 'wc -l < output.txt'
+}
+oldoutputlines=$( outputlines )
+#echo $oldoutputlines
+#sleep 5s
 
-       i=$(( i + 1 ))
-    done
-)
+function runLauncher ()
+{
+	cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
+	(
+    		read line
+		n=$( echo $line | awk '{ print $1 }' )
+		#echo $n
+    		#sleep 5s
+    		p=0
+    		while [[ $i -lt $n ]]
+    		do
+	    		read line
+			p=$( echo $line | awk '{ print $1 }' )
+	        	host=$( echo $line | awk '{ print $2 }' )
+		
+			#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE;" &
+			#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE; exec bash" &
+			ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host "java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $0 $1 $2" &
+	
+       			i=$(( i + 1 ))
+    		done
+	)
+}
+
+runLauncher
 newoutputlines=$oldoutputlines
 while [[ $newoutputlines -le $oldoutputlines ]]
 do
 	sleep 20s
-	newoutputlines=$(ssh dc01 'wc -l <output.txt')
+	newoutputlines=$( outputlines )
 done
 #sleep 2m
 
