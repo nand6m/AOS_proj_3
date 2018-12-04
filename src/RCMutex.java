@@ -123,6 +123,7 @@ public class RCMutex implements MsgListener {
 	public synchronized void receiveKey(int neighborId)
 	{
 		keys[neighborId] = true;
+		notifyAll();
 	}
 
 	public synchronized void sendRequest(int id) {

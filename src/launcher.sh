@@ -1,5 +1,5 @@
 #!/bin/bash
-./cleanup.sh $1
+./cleanup.sh $1 &> /dev/null
 
 # Change this to your netid
 netid=sxd167930
@@ -10,7 +10,7 @@ RELDIR=RCMutex/AOS_proj_3
 PROJDIR=$DCDIR/$RELDIR
 
 if [[ $# -ge 1 ]]; then
-	CONFIGNAME=$1
+	CONFIGNAME=$(basename $1)
 else
 	#Directory where the config file is located on your local system
 	CONFIGNAME=config.txt
@@ -29,9 +29,10 @@ BINDIR=$PROJDIR/bin
 PROG=Main
 
 #Compile
-./Compile.sh
+./Compile.sh &> /dev/null
 echo 'Compiled'
 
+{
 #Move
 ssh $netid@dc01.utdallas.edu "mkdir -p $RELDIR/src; mkdir -p $RELDIR/bin; mkdir -p $RELDIR/lib"
 scp ../lib/* $netid@dc01.utdallas.edu:$RELDIR/lib/
@@ -39,8 +40,8 @@ scp Compile.sh $netid@dc01.utdallas.edu:$RELDIR/src/
 scp *.java $netid@dc01.utdallas.edu:$RELDIR/src/
 scp *.txt $netid@dc01.utdallas.edu:$RELDIR/src/
 ssh $netid@dc01.utdallas.edu "./$RELDIR/src/Compile.sh"
+} &> /dev/null
 echo 'Deployment complete'
-
 i=0
 
 function outputlines () {
@@ -81,11 +82,20 @@ function runLauncher ()
 		newoutputlines=$oldoutputlines
 		while [[ $newoutputlines -le $oldoutputlines ]]
 		do
-			sleep 20s
+			sleep 10s
 			newoutputlines=$( outputlines )
 		done
-		./cleanup.sh $CONFIGLOCAL $n
+		./cleanup.sh $CONFIGNAME $n &> /dev/null
 	)
+}
+
+c_echo(){
+    RED="\033[0;31m"
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' # No Color
+
+    printf "${!1}${2} ${NC}\n"
 }
 
 all_ns=()
@@ -127,7 +137,7 @@ if [[ $# -ge 2 ]]; then
 			elif [[ $looper = 'd' ]]; then d_mean=$j
 			elif [[ $looper = 'c' ]]; then c_mean=$j
 			fi
-			echo "Running with combination $n $d_mean $c_mean"
+			c_echo "RED" "Running with combination $n $d_mean $c_mean"
 			runLauncher $n $d_mean $c_mean
 		done	
 	done

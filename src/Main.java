@@ -33,10 +33,9 @@ public class Main {
 		MessageManager.waitForAllInitiate();
 		//System.out.println(NIobj.id +" :id");
 		//mt.run();
-		app.run();
-		
+		app.start();
+		app.join();
 		MessageManager.joinAllThreads();
-		
 		//Thread.sleep(10000);
 	}
 }
