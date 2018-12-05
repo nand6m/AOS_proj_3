@@ -55,6 +55,7 @@ public class RCMutex implements MsgListener {
 
 	public synchronized void cs_enter() throws InterruptedException
 	{	
+		System.out.println("Waiting for CS");
 		csRequests++;
 		ReqTimeStamp = CurTimeStamp + 1;
 		CSrequired = true;
@@ -64,6 +65,7 @@ public class RCMutex implements MsgListener {
 			wait();
 			inCS = hasAllKeys();
 		}
+		System.out.println("Received CS");
 	}
 	public synchronized void cs_leave() {
 		inCS = false;

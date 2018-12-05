@@ -59,9 +59,10 @@ public class Application extends Thread implements MsgListener{
 		totalResponseTime += responseTime;
 		if(reportsReceived == nodes)
 		{
-			msgComplexity /= nodes;
-			totalResponseTime /= nodes;
 			throughPut_endTime = System.currentTimeMillis();
+			MessageManager.terminateAll();
+			msgComplexity /= nodes;
+			totalResponseTime /= nodes;	
 			systemThroughput = throughPut_endTime - throughPut_startTime;
 			try{
 				DecimalFormat df = new DecimalFormat("0.00");
@@ -80,7 +81,6 @@ public class Application extends Thread implements MsgListener{
 			catch(IOException ie){
 				ie.printStackTrace();
 			}
-			MessageManager.terminateAll();
 		}
 	}
 
@@ -162,7 +162,7 @@ public class Application extends Thread implements MsgListener{
 		
 		if(nodeId == 0)
 		{
-			recordMetrics(rcm.getAverageMessageComplexity(), total_response_time);
+			recordMetrics(rcm.getAverageMessageComplexity(), ((double)total_response_time)/num_iteration);
 		}
 		else
 		{

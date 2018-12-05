@@ -1,7 +1,2 @@
-/*.class
-/\
-/config.txt
-/launcher.sh
-/config_perf.txt
-/launcher_config.txt
-/cleanup.sh
+/Compile.sh
+/killallTerminals.sh

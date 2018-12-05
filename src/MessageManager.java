@@ -217,7 +217,7 @@ public class MessageManager extends Thread implements MsgListener, Sender{
 			while(!initiated)
 			{
 				if(m.type == MsgType.initiate) break;
-				wait();
+				waitForInitiate();
 			}
 			if(socket.isClosed()){
 				//System.out.println("Socket closed");

@@ -29,25 +29,31 @@ function cleanUp ()
 	cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
 	(
 	    	read line
-		if [[ $# -ge 1 ]]; then	n=$2
+		if [[ $# -ge 1 ]]; then	n=$1
 		else n=$( echo $line | awk '{ print $1 }' )
 		fi
     		
     		while [[ $i -lt $n ]]
     		do
-    		read line
-        	host=$( echo $line | awk '{ print $2 }' )
-        	#echo $host
-        	#gnome-terminal -- ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host killall -u $netid &
-        	ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host killall -u $netid &
-        	#sleep 1
-
-        	i=$(( i + 1 ))
+    			read line
+			#echo $line
+        		host=$( echo $line | awk '{ print $2 }' )
+       		 	#echo $host 
+       	 		#gnome-terminal -- ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host killall -u $netid &
+        		ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host "killall -u $netid" &
+			pids[${i}]=$!
+        		#sleep 1
+        		i=$(( i + 1 ))
     		done
+		# wait for all pids
+		echo "${pids[@]}" >> cleanup_pids.txt
+		for pid in ${pids[*]}; do
+    			wait $pid
+		done
 	)
 }
 
-if [[ $# -ge 2 ]]; then cleanUp $1
+if [[ $# -ge 2 ]]; then cleanUp $2
 else cleanUp
 fi
 echo "Cleanup complete"

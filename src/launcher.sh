@@ -29,7 +29,7 @@ BINDIR=$PROJDIR/bin
 PROG=Main
 
 #Compile
-./Compile.sh &> /dev/null
+./Compile.sh #&> /dev/null
 echo 'Compiled'
 
 {
@@ -52,6 +52,7 @@ function runLauncher ()
 {
 	i=0
 	oldoutputlines=$( outputlines )
+	n=$1
 	cat $CONFIGLOCAL | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
 	(
     		read line
@@ -66,27 +67,29 @@ function runLauncher ()
 		fi
     		p=0
 		#echo $n $d_mean $c_mean
+		./cleanup.sh $CONFIGNAME $n &> /dev/null
+		sleep 1s
     		while [[ $i -lt $n ]]
     		do
 	    		read line
 			p=$( echo $line | awk '{ print $1 }' )
 	        	host=$( echo $line | awk '{ print $2 }' )
 			
-			#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE;" &
-			#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE; exec bash" &
-			ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host "java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $n $d_mean $c_mean" &
+			#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $n $d_mean $c_mean;" &
+			#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $n $d_mean $c_mean; exec bash" &
+			ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host "nohup java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $n $d_mean $c_mean" &> launcher_result.txt &
 	
        			i=$(( i + 1 ))
     		done
-	
-		newoutputlines=$oldoutputlines
-		while [[ $newoutputlines -le $oldoutputlines ]]
-		do
-			sleep 10s
-			newoutputlines=$( outputlines )
-		done
-		./cleanup.sh $CONFIGNAME $n &> /dev/null
 	)
+	newoutputlines=$oldoutputlines
+	while [[ $newoutputlines -le $oldoutputlines ]]
+	do
+		sleep 5s
+		newoutputlines=$( outputlines )
+	done
+	echo 'Completed'
+	./cleanup.sh $CONFIGNAME $n &> /dev/null
 }
 
 c_echo(){
@@ -137,8 +140,8 @@ if [[ $# -ge 2 ]]; then
 			elif [[ $looper = 'd' ]]; then d_mean=$j
 			elif [[ $looper = 'c' ]]; then c_mean=$j
 			fi
-			c_echo "RED" "Running with combination $n $d_mean $c_mean"
-			runLauncher $n $d_mean $c_mean
+			c_echo "RED" "Running with combination $n $c_mean $d_mean"
+			wait -n; runLauncher $n $d_mean $c_mean
 		done	
 	done
 else
