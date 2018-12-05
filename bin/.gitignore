@@ -1,2 +1,4 @@
 /Compile.sh
 /killallTerminals.sh
+/cleanup_pids.txt
+/launcher_result.txt

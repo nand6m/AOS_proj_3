@@ -77,7 +77,7 @@ function runLauncher ()
 			
 			#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $n $d_mean $c_mean;" &
 			#gnome-terminal -- bash -c "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $n $d_mean $c_mean; exec bash" &
-			ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host "nohup java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $n $d_mean $c_mean" &> launcher_result.txt &
+			ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $netid@$host "nohup java -cp $BINDIR:$RELDIR/lib/* $PROG $p $CONFIGREMOTE $n $d_mean $c_mean" &>> launcher_result.txt &
 	
        			i=$(( i + 1 ))
     		done
