@@ -1,8 +1,7 @@
 # AOS_proj_3
 Roucairol &amp; Carvalho's Mutual exclusion
 
-***********************************
-* COMPILING & RUNNING THE PROGRAM *
+* COMPILING & RUNNING THE PROGRAM 
 ***********************************
 
 1. Unzip the contents of the archive
@@ -19,8 +18,8 @@ or	./launcher.sh config.txt
 	cat launcher_result.txt
 
 
-**************************************
-* To test with different config file *
+
+* To test with different config file 
 **************************************
 
 1) Create the config file in src folder
