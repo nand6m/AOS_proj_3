@@ -1,7 +1,9 @@
 # AOS_proj_3
-Roucairol &amp; Carvalho's Mutual exclusion
+## Roucairol &amp; Carvalho's Mutual exclusion  
 
-Steps to run the program
+Project requirements are available in `project3.pdf`
+
+## Steps to run the program
 1. Unzip the contents of the archive.    
 2. Make required modifications to the configuration file which is available in src folder.  
 3. Make required changes in launcher & cleanup scripts such as netid and folder path. These scripts are available in src folder.
@@ -17,7 +19,7 @@ To run comment `app.start()` & `app.join()` (i.e. lines 36, 37) and uncomment `m
 
 
 
-Steps to test with different config file 
+## Steps to test with different config file 
 1. Create the config file in src folder  
 2. To launch `./launch.sh <Your_config_file>`
 
